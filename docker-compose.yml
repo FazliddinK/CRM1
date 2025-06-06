@@ -6,12 +6,17 @@ services:
     depends_on:
       db:
         condition: service_healthy
+    environment:
+      MYSQL_HOST: db
+      MYSQL_USER: root
+      MYSQL_PASSWORD: f20142511052f
+      MYSQL_DATABASE: sales_crm
 
   db:
     image: mysql:8
     environment:
       MYSQL_ROOT_PASSWORD: f20142511052f
-      MYSQL_DATABASE: crm_db
+      MYSQL_DATABASE: sales_crm
     volumes:
       - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql
     ports:
