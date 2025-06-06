@@ -2,14 +2,13 @@
 from flask import Flask, request, jsonify, send_file, render_template
 from flask_cors import CORS
 import pymysql
-import csv
 import io
 import time
 from datetime import datetime
 from pymysql import OperationalError, MySQLError
-import openpyxl
 from openpyxl import Workbook
 from contextlib import contextmanager
+import os
 
 app = Flask(__name__, template_folder='app/templates', static_folder='app/static')
 CORS(app)
@@ -23,10 +22,10 @@ class Database:
         for attempt in range(max_retries):
             try:
                 self.connection = pymysql.connect(
-                    host='db',
-                    user='root',
-                    password='f20142511052f',
-                    database='sales_crm',
+                    host=os.getenv('MYSQL_HOST', 'db'),
+                    user=os.getenv('MYSQL_USER', 'root'),
+                    password=os.getenv('MYSQL_PASSWORD'),
+                    database=os.getenv('MYSQL_DATABASE', 'sales_crm'),
                     cursorclass=pymysql.cursors.DictCursor,
                     autocommit=True
                 )
@@ -174,6 +173,10 @@ def get_cash_sales():
             WHERE date = %s
             ORDER BY time DESC
         """, (date,))
+
+        for row in result:
+            row['time'] = str(row['time'])
+
         return jsonify(result)
     except ValueError:
         return jsonify({"error": "Invalid date format. Use YYYY-MM-DD"}), 400
@@ -269,6 +272,10 @@ def get_client_sales():
             WHERE date = %s
             ORDER BY time DESC
         """, (date,))
+
+        for row in result:
+            row['time'] = str(row['time'])
+
         return jsonify(result)
     except Exception as e:
         return jsonify({'error': str(e)}), 500
@@ -317,6 +324,10 @@ def api_get_expenses():
             WHERE date = %s
             ORDER BY time DESC
         """, (date,))
+
+        for row in expenses:
+            row['time'] = str(row['time'])
+
         return jsonify(expenses)
     except Exception as e:
         return jsonify({'error': str(e)}), 500
